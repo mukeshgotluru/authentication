@@ -4,6 +4,7 @@ const path = require("path");
 const { open } = require("sqlite");
 const sqlite3 = require("sqlite3");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 const app = express();
 app.use(express.json());
@@ -18,8 +19,8 @@ const initializeDBAndServer = async () => {
       filename: dbPath,
       driver: sqlite3.Database,
     });
-    app.listen(3000, () => {
-      console.log("Server Running at http://localhost:3000/");
+    app.listen(3001, () => {
+      console.log("Server Running at http://localhost:3001/");
     });
   } catch (e) {
     console.log(`DB Error: ${e.message}`);
@@ -81,7 +82,8 @@ app.post("/login/", async (request, response) => {
   } else {
     const isPasswordMatched = await bcrypt.compare(password, dbUser.password);
     if (isPasswordMatched === true) {
-      response.send("Login success!");
+      const jwtToken = jwt.sign(payload, "abcdefg");
+      response.send({ jwtToken });
     } else {
       response.status(400);
       response.send("Invalid password");
